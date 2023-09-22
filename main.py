@@ -1,25 +1,26 @@
-import machine, os
-from machine import Pin
+import os, ujson
+from machine import Pin, Timer
 from time import sleep
 
-# Timer init
-timer_red = machine.Timer(1)
-timer_blue = machine.Timer(2)
+# Get needed data from settings.json
+f_stngs = open("settings.json")
+pin_data = ujson.load(f_stngs)
 
-# Flag for some sort of timer
+# Timer init
+timer = Timer(0)
+
+# Flag for some sort of chronometer timer
 flag_red = False
 flag_blue = False
-
-# Start timer
 time_blue = 0
 time_red = 0
 
 # Pins
-led_red = Pin(15, Pin.OUT)
-push_button_red = Pin(18, Pin.IN)
+led_red = Pin(pin_data["led_red"], Pin.OUT)
+push_button_red = Pin(pin_data["button_red"], Pin.IN)
 
-led_blue = Pin(13, Pin.OUT)
-push_button_blue = Pin(12, Pin.IN)
+led_blue = Pin(pin_data["led_blue"], Pin.OUT)
+push_button_blue = Pin(pin_data["button_blue"], Pin.IN)
 
 # Timer custom callbacks
 def plustimered():
@@ -45,9 +46,9 @@ while not flag_stop:
 
   # Timer data report
   if flag_red:
-    timer_red.init(mode=machine.Timer.ONE_SHOT, period=1000, callback=plustimered())
+    timer.init(mode=Timer.ONE_SHOT, period=1000, callback=plustimered())
   elif flag_blue:
-      timer_blue.init(mode=machine.Timer.ONE_SHOT, period=1000, callback=plustimeblue())
+      timer.init(mode=Timer.ONE_SHOT, period=1000, callback=plustimeblue())
   
   # Button interaction
   if logic_state_blue and logic_state_red:
